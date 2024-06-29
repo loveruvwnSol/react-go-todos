@@ -1,0 +1,42 @@
+services:
+  frontend:
+    container_name: frontend
+    build: 
+      context: .
+      dockerfile : ./docker/frontend.dockerfile
+    tty: true
+    volumes:
+      - ./frontend:/home/frontend
+    command: sh -c "npm run start" 
+    ports:
+      - 3000:3000
+    depends_on:
+      - backend
+
+  backend:
+    container_name: backend
+    build: 
+      context: .
+      dockerfile: ./docker/backend.dockerfile
+    volumes:
+      - ./backend:/go/src/app
+    tty: true
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      - database
+
+  database:
+    container_name: database
+    image: mysql:8.0
+    volumes:
+      - ./database/my.cnf:/etc/mysql/conf.d/my.cnf
+    environment:
+      MYSQL_DATABASE: main
+      MYSQL_USER: docker
+      MYSQL_PASSWORD: docker
+      MYSQL_ROOT_PASSWORD: MYSQL_ROOT_PASSWORD
+      TZ: "Asia/Tokyo"
+    ports:
+      - 3306:3306
+    platform: linux/amd64
