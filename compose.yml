@@ -1,13 +1,13 @@
 services:
   frontend:
     container_name: frontend
-    build: 
+    build:
       context: .
-      dockerfile : ./docker/frontend.dockerfile
+      dockerfile: ./docker/frontend.dockerfile
     tty: true
     volumes:
       - ./frontend:/home/frontend
-    command: sh -c "npm run start" 
+    command: sh -c "npm run start"
     ports:
       - 3000:3000
     depends_on:
@@ -15,7 +15,7 @@ services:
 
   backend:
     container_name: backend
-    build: 
+    build:
       context: .
       dockerfile: ./docker/backend.dockerfile
     volumes:
@@ -24,7 +24,8 @@ services:
     ports:
       - "127.0.0.1:8080:8080"
     depends_on:
-      - database
+      database:
+        condition: service_healthy
 
   database:
     container_name: database
@@ -39,4 +40,9 @@ services:
       TZ: "Asia/Tokyo"
     ports:
       - 3306:3306
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-u", "root" ]
+      interval: 6s
+      timeout: 1s
+      retries: 5
     platform: linux/amd64
