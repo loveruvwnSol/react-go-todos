@@ -7,7 +7,7 @@ services:
     tty: true
     volumes:
       - ./frontend:/home/frontend
-    command: sh -c "npm run start"
+    command: sh -c 'bash /home/frontend/bin/init.sh'
     ports:
       - 3000:3000
     depends_on:
