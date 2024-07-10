@@ -15,6 +15,7 @@ func main() {
 
 	var db = dbInit()
 	db.AutoMigrate(&model.Todo{})
+	db.AutoMigrate(&model.User{})
 
 	router.Use(middleware.CORSMiddleware())
 
@@ -22,6 +23,11 @@ func main() {
 	router.POST("/todos", handler.PostTodo(db))
 	router.PUT("/todos:id", handler.UpdateTodo(db))
 	router.DELETE("/todos:id", handler.DeleteTodo(db))
+
+	router.GET("/user", middleware.AuthMiddleware(), handler.GetCurrentUser(db))
+
+	router.POST("/signup", handler.SignUp(db))
+	router.POST("/signin", handler.SignIn(db))
 
 	router.Run(":8080")
 }

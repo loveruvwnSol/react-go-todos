@@ -23,6 +23,17 @@ func GetTodos(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+func FetchTodos(db *gorm.DB) ([]model.Todo, error) {
+	var todos = []model.Todo{}
+	result := db.Find(&todos)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return todos, nil
+}
+
 func PostTodo(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var newTodo model.Todo
@@ -43,7 +54,12 @@ func PostTodo(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		c.IndentedJSON(http.StatusCreated, newTodo)
+		todos, err := FetchTodos(db)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Can not read todos"})
+			return
+		}
+		c.IndentedJSON(http.StatusCreated, &todos)
 	}
 }
 
@@ -72,6 +88,14 @@ func UpdateTodo(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Not found the todo"})
 			return
 		}
+
+		todos, err := FetchTodos(db)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Can not read todos"})
+			return
+		}
+		c.IndentedJSON(http.StatusOK, todos)
 	}
 }
 
@@ -95,5 +119,13 @@ func DeleteTodo(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Not found the todo"})
 			return
 		}
+
+		todos, err := FetchTodos(db)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Can not read todos"})
+			return
+		}
+		c.IndentedJSON(http.StatusOK, &todos)
 	}
 }
